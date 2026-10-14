@@ -4,13 +4,16 @@ import { logger } from '../utils/logger.js';
 
 const WELCOME_CHANNEL_ID = process.env.WELCOME_CHANNEL_ID || '1560032107470790696';
 
-export const welcomeEvent = {
+export default {
     name: Events.GuildMemberAdd,
+    once: false,
     async execute(member) {
         try {
+            logger.info(`[Welcome] Member joined: ${member.user.tag} in ${member.guild.name}`);
+
             const channel = await member.guild.channels.fetch(WELCOME_CHANNEL_ID).catch(() => null);
             if (!channel || !channel.isTextBased()) {
-                if (logger?.error) logger.error(`[Welcome] Channel ${WELCOME_CHANNEL_ID} not found.`);
+                logger.error(`[Welcome] Channel ${WELCOME_CHANNEL_ID} not found or is not text-based.`);
                 return;
             }
 
@@ -41,7 +44,6 @@ export const welcomeEvent = {
             const pillX = (width - pillWidth) / 2;
             const pillY = 32;
 
-            // Pill Background with Inner Shadow Effect
             ctx.fillStyle = '#1c2026';
             ctx.beginPath();
             ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 12);
@@ -97,7 +99,6 @@ export const welcomeEvent = {
                 ctx.drawImage(avatarImg, avatarX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
                 ctx.restore();
             } catch (e) {
-                // Fallback fill if avatar fails to load
                 ctx.fillStyle = '#2b2d31';
                 ctx.beginPath();
                 ctx.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
@@ -118,7 +119,7 @@ export const welcomeEvent = {
             ctx.font = '400 18px "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
             ctx.fillText('to', width / 2, 392);
 
-            // Server Name (e.g. "Sandy Shores, DOJ:RP")
+            // Server Name
             ctx.fillStyle = '#e5e7eb';
             ctx.font = '500 22px "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
             ctx.fillText(`${member.guild.name}`, width / 2, 428);
@@ -131,11 +132,9 @@ export const welcomeEvent = {
                 files: [attachment]
             });
 
-            if (logger?.info) logger.info(`[Welcome] Successfully posted banner image for ${member.user.tag}`);
+            logger.info(`[Welcome] Successfully sent welcome card for ${member.user.tag}`);
         } catch (err) {
-            console.error('[Welcome Event Error]:', err);
+            logger.error('[Welcome Event Error]:', err);
         }
     }
 };
-
-export default welcomeEvent;
